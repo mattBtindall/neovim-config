@@ -1,5 +1,6 @@
 'use strict'
 
 const test = Math.random();
-test = 'chicken' 
+test = 'chicken'
 antoherTest = 'bacon'
+
