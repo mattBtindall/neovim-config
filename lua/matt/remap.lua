@@ -73,6 +73,7 @@ vim.keymap.set("n", "<leader><leader>", function()
 end)
 
 -- my custom mappings
+-- save and close
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "QuitPre" }, {
     callback = function()
         if vim.bo.modified and not vim.bo.readonly and vim.fn.expand("%") ~= "" and vim.bo.buftype == "" then
@@ -80,6 +81,12 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "QuitPre" }, {
         end
     end,
 })
-
 vim.keymap.set("n", "<leader>q", vim.cmd.q)
 vim.keymap.set("n", "<leader>w", vim.cmd.w)
+
+vim.keymap.set("n", "<leader>yp", function()
+  vim.fn.setreg("+", vim.fn.expand("%:p"))
+end, { desc = "Copy absolute file path to clipboard" })
+
+vim.keymap.set("n", "<leader>gd", ":Gdiffsplit<CR>", { desc = "Run Gdiffsplit" })
+
