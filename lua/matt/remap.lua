@@ -90,3 +90,13 @@ end, { desc = "Copy absolute file path to clipboard" })
 
 vim.keymap.set("n", "<leader>gd", ":Gdiffsplit<CR>", { desc = "Run Gdiffsplit" })
 
+-- highlight yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+    callback = function()
+        if vim.v.operator == "y" and vim.fn.mode() ~= "v" and vim.fn.mode() ~= "V" then
+            vim.highlight.on_yank { higroup = "IncSearch", timeout = 300 }
+        end
+    end
+})
+
+vim.keymap.set("n", "<leader>td", "<cmd>lua vim.lsp.buf.definition()<CR>", { noremap = true, silent = true, desc = "Go to definition" })
