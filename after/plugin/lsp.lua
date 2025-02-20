@@ -33,13 +33,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
 -- You'll find a list of language servers here:
 -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
 -- These are example language servers.
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
+local handle = io.popen("npm list -g --parseable | grep @vue/language-server")
+local result = handle:read("*a")
+handle:close()
+local vue_language_server_path = result:match("^%s*(.-)%s*$")
 
-require('lspconfig').gleam.setup({})
-require('lspconfig').ocamllsp.setup({})
 require('lspconfig').eslint.setup({
-  --- ...
   on_attach = function(client, bufnr)
     vim.api.nvim_create_autocmd("BufWritePre", {
       buffer = bufnr,
@@ -47,7 +46,18 @@ require('lspconfig').eslint.setup({
     })
   end,
 })
-require('lspconfig').ts_ls.setup({})
+require('lspconfig').ts_ls.setup({
+    init_options = {
+            plugins = {
+                {
+                    name = '@vue/typescript-plugin',
+                    location = vue_language_server_path,
+                    languages = { 'vue' },
+                },
+            },
+        },
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+})
 require('lspconfig').tailwindcss.setup({})
 require('lspconfig').phpactor.setup({})
 

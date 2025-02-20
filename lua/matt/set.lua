@@ -27,3 +27,7 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
+
+vim.opt.guicursor = "n-v-c:block-blinkon530,i:ver25-blinkon530"
+vim.wo.fillchars='eob: '
+
