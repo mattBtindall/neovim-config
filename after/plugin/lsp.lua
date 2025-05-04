@@ -46,6 +46,7 @@ require('lspconfig').eslint.setup({
     })
   end,
 })
+
 require('lspconfig').ts_ls.setup({
     init_options = {
             plugins = {
@@ -58,6 +59,19 @@ require('lspconfig').ts_ls.setup({
         },
         filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
 })
+
 require('lspconfig').tailwindcss.setup({})
+
 require('lspconfig').phpactor.setup({})
+
+require('lspconfig').html.setup({
+    filetypes = { "html", "php", "phtml" },
+    init_options = {
+        provideFormatter = true,
+        embeddedLanguages = {
+            css = true,
+            javascript = true
+        },
+    }
+})
 

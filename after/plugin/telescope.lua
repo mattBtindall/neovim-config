@@ -1,11 +1,18 @@
 local builtin = require('telescope.builtin')
 local telescope = require('telescope')
-vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = 'Telescope find files' }) -- find all files including node_modules
-vim.keymap.set('n', '<C-p>', builtin.git_files, {}) -- find nly files that are tracked by git
+local lga_actions = require("telescope-live-grep-args.actions")
+
+vim.keymap.set('n', '<leader>pf', function ()
+    builtin.find_files({
+        no_ignore = true
+    })
+end, { desc = 'Telescope find all files' })
+
+vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = 'Telescope find files respects .gitignore'})
 
 -- opens recent files and goes to normal mode so can scroll straight away with jk keys
 vim.keymap.set('n', '<leader>pr', function()
-  require('telescope.builtin').oldfiles({
+  builtin.oldfiles({
     cwd_only = true,
     attach_mappings = function(_, map)
       -- Immediately switch to normal mode when the picker opens
@@ -18,25 +25,48 @@ vim.keymap.set('n', '<leader>pr', function()
 end, { desc = "Recent files in project (normal mode)" })
 
 vim.keymap.set("v", "<leader>ps", function()
-  -- Get the selected text in visual mode
-  local function get_visual_selection()
-    vim.cmd('noau normal! "vy"') -- Yank selection into register v
-    return vim.fn.getreg('v') -- Get the yanked text
-  end
-
-  local selected_text = get_visual_selection()
-
-  -- Call live_grep_args with the selected text
-  require("telescope").extensions.live_grep_args.live_grep_args({ default_text = selected_text })
+    require("telescope-live-grep-args.shortcuts").grep_visual_selection()
 end, { desc = "Live Grep Args (Find Selected Text)" })
 
 vim.keymap.set("n", "<leader>ps", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 
+vim.keymap.set('n', '<leader>ds', function ()
+    local cwd = vim.fn.getcwd()
+    local dir = vim.fn.expand("%:p:h")
+    dir = dir:gsub("oil://", "")
+
+    -- Normalize to remove trailing slash (if any)
+    if cwd:sub(-1) == "/" then
+      cwd = cwd:sub(1, -2)
+    end
+
+    local relativeDir = dir:gsub(vim.pesc(cwd), "")
+
+    telescope.extensions.live_grep_args.live_grep_args({
+        default_text = "--no-ignore -F '' -g **" .. relativeDir .. "/**",
+        attach_mappings = function(_, _)
+            vim.schedule(function()
+                -- Move the cursor inside the single quotes
+                local prompt_bufnr = vim.api.nvim_get_current_buf()
+                local current_line = vim.api.nvim_get_current_line()
+                local cursor_pos = current_line:find("%-F ''")
+
+                if cursor_pos then
+                    vim.api.nvim_win_set_cursor(0, {1, cursor_pos + 3})
+                end
+            end)
+            return true
+        end
+    })
+end, { desc = 'Telescope search in current dir' })
+
+-- vim.fn.expand("%:p:h").gsub("oil://", "")
 telescope.setup({
     defaults = {
-        path_display = {
-            "truncate"
-        }
+        path_display = {"absolute"},
+        wrap_results = true,
+        layout_strategy = "vertical",
+        winblend = 5
     }
 })
 telescope.load_extension("live_grep_args")
